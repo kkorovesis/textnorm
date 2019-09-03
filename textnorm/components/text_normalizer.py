@@ -10,8 +10,8 @@ import logging
 # import unittest
 from text_tokenizer import Tokenizer
 from regex_manager import RegexManager
-from xnorm.tools.utils import unpack_contractions
-from xnorm.tools.handle_emoji import add_special_emoji_tag
+from textnorm.tools.utils import unpack_contractions
+from textnorm.tools.handle_emoji import add_special_emoji_tag
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 dt = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
@@ -121,21 +121,21 @@ def test():
 
   # todo: add text cleaner
 
-# Setup XNorm Tokenizer
+# Setup textnorm Tokenizer
   tokenizer_params = {
     'tokens': False,
   }
   tokenizer = Tokenizer(**tokenizer_params)
 
-# Setup XNorm Normalizer
-  xnorm_params = {
+# Setup textnorm Normalizer
+  textnorm_params = {
     'tokenizer': tokenizer,
     'expand_contractions': True,
     'tag_tokens': True,
     'tag_mode': 'placeholder',
     'tag_pipeline': TAG_PATTERS,
   }
-  x_normalizer = TextNorm(**xnorm_params)
+  x_normalizer = TextNorm(**textnorm_params)
 
   data = [
     "Let here it for Spurs ＼(^o^)／!!! #coys #totenhamhotspurs :)))",

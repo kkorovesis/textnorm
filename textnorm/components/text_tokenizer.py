@@ -17,7 +17,7 @@ from textnorm.components.regex_manager import RegexManager
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 dt = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
 logger = logging.getLogger()
-from xnorm.tools.handle_emoji import has_emoji, append_emojis_pattern
+from textnorm.tools.handle_emoji import has_emoji, append_emojis_pattern
 
 if sys.version_info[0] == 3:
   import html

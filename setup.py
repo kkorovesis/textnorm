@@ -1,14 +1,14 @@
 import setuptools
-from xnorm import __version__
+from textnorm import __version__
 
 with open("README.md", "r") as fh:
   long_description = fh.read()
 
 setuptools.setup(
-  name="xnorm",
+  name="textnorm",
   version=__version__,
-  description="Generic Text Normalizer",
-  url="https://bitbucket.org/xplainlabs/xnorm",
+  description="Text Normalizer",
+  url="https://github.com/kkorovesis/textnorm",
   packages=setuptools.find_packages(),
 
   classifiers=[
