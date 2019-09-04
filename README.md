@@ -10,22 +10,6 @@ Python package for Text Normalizing. The purpose of this project is to build a s
 
 * Text tokenization: Tokenize text (match known patterns)
 
-
-## Installation
-
-```bash
-git clone https://github.com/kkorovesis/textnorm
-cd textnorm
-pip install .
-
-## Test
-
-```python
-from textnorm.components import text_normalizer
-text_normalizer.test()
-```
-
-
 TextNorm Spell Corrector is based on Peter Norvig's algorithm[1] for word editing. Tagging and Tokenizer
 is based on ekphrasis[2]. Some features from textacy[3] are used in text pre-processing (only code snippets, no imports)
 
@@ -34,6 +18,22 @@ is based on ekphrasis[2]. Some features from textacy[3] are used in text pre-pro
  [2] https://github.com/cbaziotis/ekphrasis
 
  [3] https://github.com/chartbeat-labs/textacy
+
+## Installation
+
+```bash
+git clone https://github.com/kkorovesis/textnorm
+cd textnorm
+pip install .
+```
+
+## Test
+
+```python
+from textnorm.components import text_normalizer
+text_normalizer.test()
+```
+
 
 ## Structure
 
