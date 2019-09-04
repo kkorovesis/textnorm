@@ -13,6 +13,7 @@ import datetime
 import logging
 import traceback
 from textnorm.components.regex_manager import RegexManager
+from xnorm.tools.utils import dict_replace
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 dt = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
@@ -27,7 +28,11 @@ elif sys.version_info[0] == 2:
   parser = HTMLParser.HTMLParser()
   unescape = lambda x: str(parser.unescape(x.decode('utf8')))
 
-REGEX_PIPELINE = ["URL"]
+REGEX_PIPELINE = [
+  "HTML_TAG", "URL", "DATE", "TIME", "PHONE", "CASHTAG", "PERCENT", "MONEY", "HASHTAG", "EMAIL", "USER", "QUOTES",
+  "XNORM_TAG", "BBCODE", "PARENTHESIS", "BRACKET", "BRACES", "ACRONYM", "EMPHASIS", "CONTRACTION", "SPECIAL_CONTRACTION",
+  "UNKNOWN_1", "LTR_FACE", "RTL_FACE", "REST_EMOTICONS", "EASTERN_EMOTICONS"
+]
 
 
 class Tokenizer(object):
@@ -40,9 +45,18 @@ class Tokenizer(object):
 
     self.tokens = kwargs.get('tokens', False)
     self.regex_pipeline = kwargs.get('regex_pipeline', REGEX_PIPELINE)
+    self.lowercase = kwargs.get('lowercase', False)
+    # self.remove_stopwords = kwargs.get('remove_stopwords', False) # soon
+    self.special_dicts = kwargs.get('special_dicts', [])
+    self.pickled_words = kwargs.get('pickled_words', None)
+
     self.pipeline = []
     self.regexes = RegexManager().expressions
     self.build_pipeline(self.regex_pipeline)
+
+    # if self.remove_stopwords:
+    #   from nltk.corpus import stopwords
+    #   self.stopwords = stopwords.words('english')
 
     all_patterns = "|".join(self.pipeline)  # join all patters to one GREEDY pattern for tokenization
     self.tok = re.compile(r"({})".format(all_patterns), flags=re.UNICODE | re.IGNORECASE)
@@ -76,10 +90,11 @@ class Tokenizer(object):
     text = re.sub(r"\b([d])\s(['])\s(ya)", r"\1\2\3 ", text)
     return text
 
-  def tokenize(self, text):
+  def tokenize(self, text, spell_corrector):
     """
     Tokenize text
     :param text:
+    :param spell_corrector:
     :return:
     """
 
@@ -88,6 +103,16 @@ class Tokenizer(object):
     else:
       escaped = unescape(text)  # remove special character quoting
       tokenized = self.tok.findall(escaped)
+
+    if self.lowercase:
+      tokenized = [t.lower() for t in tokenized]
+
+    if tokenized and spell_corrector:
+      tokenized = [spell_corrector.correct(t) for t in tokenized]
+
+    if self.special_dicts:
+      for d in self.special_dicts:
+        tokenized = dict_replace(tokenized, d)
 
     if not self.tokens:
       try:

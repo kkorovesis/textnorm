@@ -8,8 +8,8 @@ import os
 import nltk
 import datetime
 import logging
-from xnorm.tools.bad_words_list import get_bad_words_list
-from xnorm.tools.slang_dict import slangdict
+from textnorm.tools.bad_words_list import get_bad_words_list
+from textnorm.tools.slang_dict import slangdict
 
 try:
   from nltk.corpus import brown

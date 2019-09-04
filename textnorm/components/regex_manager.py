@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import re
-from textnorm.patterns.generate_expressions import EXPRESSIONS
+from textnorm.patterns.expressions import EXPRESSIONS
 
 
 class RegexManager(object):

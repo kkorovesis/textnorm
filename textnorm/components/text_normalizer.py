@@ -8,8 +8,10 @@ import nltk
 import datetime
 import logging
 # import unittest
-from text_tokenizer import Tokenizer
-from regex_manager import RegexManager
+from textnorm.components.text_tokenizer import Tokenizer
+from textnorm.components.regex_manager import RegexManager
+from textnorm.components.spell_correct import SpellCorrector
+from textnorm.components.text_sanitizer import Sanitizer
 from textnorm.tools.utils import unpack_contractions
 from textnorm.tools.handle_emoji import add_special_emoji_tag
 
@@ -37,12 +39,13 @@ class TextNorm(object):
 
   def __init__(self, **kwargs):
     self.tokenizer = kwargs.get('tokenizer', None)
+    self.sanitizer = kwargs.get('sanitizer', None)
+    self.speller = kwargs.get('speller', None)
     self.expand_contractions = kwargs.get('expand_contractions', False)
-    self.tag_pipeline = kwargs.get('tag_pipeline', [])
-    self.tag_tokens = kwargs.get('tag_tokens', True)
-    self.tag_mode = kwargs.get('tag_mode', 'wrap')
+    self.tagging = kwargs.get('tagging', {})
 
-    self.segmenter = None
+    self.break_hashtags = kwargs.get('corrector_corpus', False)
+
     self.spell_corrector = None
     self.regexes = RegexManager().get_compiled()
 
@@ -80,22 +83,27 @@ class TextNorm(object):
 
     doc = unpack_contractions(doc, self.expand_contractions)
 
-    # todo: include text cleaning
+    # sanitize text
+    if doc and self.sanitizer:
+      doc = self.sanitizer.text_filter(doc)
 
-    # add special tag in text
-    if doc and self.tag_tokens:
-      for pattern in self.tag_pipeline:
+    # tagging
+    for tag_mode in ['remove', 'placeholder', 'wrap', 'single']:
+      tag_pipeline = self.tagging.get(tag_mode)
+      for pattern in tag_pipeline:
         if pattern == "EMOJI":
-          doc = add_special_emoji_tag(doc, mode=self.tag_mode)
+          doc = add_special_emoji_tag(doc, mode=tag_mode)
         else:
-          doc = self.regexes[pattern].sub(lambda w: self.add_tag(w, pattern, mode=self.tag_mode), doc)
+          doc = self.regexes[pattern].sub(lambda w: self.add_tag(w, pattern, mode=tag_mode), doc)
 
     # tokenize text and match tokens
     if doc and self.tokenizer:
-      doc = self.tokenizer.tokenize(doc)
+      doc = self.tokenizer.tokenize(doc, self.speller)
 
     else:
       return doc
+
+    # todo: Replace tokens with special dictionaries (slang, emoticons ...)
 
     return doc
 
@@ -110,38 +118,84 @@ class TextNorm(object):
       yield self.preprocess(d)
 
 
-def test():
+# Replace bad words and slang
+  from textnorm.tools.utils import get_bad_words_dict, get_slang_dict
+  special_dicts = [
+    get_bad_words_dict(),
+    get_slang_dict(),
+  ]
+
+
+
+def test(data=None):
 
   logger.info("Run Test")
 
 # Patters you want to tag
-  TAG_PATTERS = ["URL"]
 
-  # todo: add repl_dicts
+  handle_tags = {
+    'single': [
 
-  # todo: add text cleaner
+    ],
+    'wrap': [
+      "URL", "PHONE", "DATE", "TIME", "CASHTAG", "PERCENT", "MONEY", "HASHTAG", "EMAIL", "USER",
+      "BBCODE", "ACRONYM", "ASCI_ARROWS"
+    ],
+    'placeholder': [
+      "EMOJI", "UNKNOWN_1", "LTR_FACE", "RTL_FACE", "REST_EMOTICONS", "EASTERN_EMOTICONS"
+    ],
+    'remove': [
+      "HTML_TAG"
+    ],
+  }
 
-# Setup textnorm Tokenizer
+
+# Replace bad words and slang
+  from textnorm.tools.utils import get_bad_words_dict, get_slang_dict
+  special_dicts = [
+    get_bad_words_dict(),
+    get_slang_dict(),
+  ]
+
+# Setup XNorm sanitizer
+  sanitzer_params = {
+    'merge_repeated_punc': True,
+  }
+  sanitizer = Sanitizer(**sanitzer_params)
+
+# Setup XNorm Tokenizer
   tokenizer_params = {
     'tokens': False,
+    'lowercase': True,
+    'remove_stopwords': True,
+    'special_dicts': special_dicts
   }
   tokenizer = Tokenizer(**tokenizer_params)
 
-# Setup textnorm Normalizer
+# # Setup XNorm Speller
+# # WARNING: The first time is slow...
+#   speller_params = {
+#     'corpus': 'brown',
+#   }
+#   speller = SpellCorrector(**speller_params)
+
+# Setup XNorm Normalizer
   textnorm_params = {
+    # 'speller': speller,
+    'sanitizer': sanitizer,
     'tokenizer': tokenizer,
     'expand_contractions': True,
-    'tag_tokens': True,
-    'tag_mode': 'placeholder',
-    'tag_pipeline': TAG_PATTERS,
+    'tagging': handle_tags
+
   }
   x_normalizer = TextNorm(**textnorm_params)
 
   data = [
-    "Let here it for Spurs ＼(^o^)／!!! #coys #totenhamhotspurs :)))",
+    "Let's here it for Spurs ＼(^o^)／!!! #coys #totenhamhotspurs. Aren't they amazing? :)))",
     "@SirajRaval:  can't wait for the Sep 12 #MachineLearning video!!! :-D https://www.youtube.com/channel/UCWN3xxRkmTPmbKwht9FuE5A",
-    "Item costs $2000 or $2K and available at 10:26 AM, 2:15pm, 1:54 pm email me tmoz @ mpampisflou@yahoo.co.uk",
-    "(o´▽`o) fuck C.I.A won't read this, I'm 99% sure:) 4gai <3"
+    "Ited costs $2000 or $2K  and available at 10:26 AM, 2:15pm, 1:54 pm email me tmoz @ mpampisflou@yahoo.co.uk",
+    "(o´▽`o) fuck C.I.A won't read this, I'm 99% sure:) 4gai <3",
+    "<html><body> <a href='https://stackoverflow.com/questions/1732348/regex-match-open-tags-except-xhtml-self-contained-tags?noredirect=1&amp;lq=1'>this question</a> </body></html>"
   ]
 
 # Normalize document (text)
