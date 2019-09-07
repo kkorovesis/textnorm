@@ -1,6 +1,6 @@
 #  TextNorm (Text Normalizer)
 
-Python package for Text Normalizing. The purpose of this project is to build a standalone text normalizer for text pre-processing. Version 0.3 includes:
+Python package for Text Normalization. The purpose of this project is to build a standalone text normalizer for text pre-processing. Version 0.3 includes:
 
 * Spell correct: Correct spelling based in Peter Norvig's algorithm.
 
@@ -33,28 +33,4 @@ pip install .
 from textnorm.components import text_normalizer
 text_normalizer.test()
 ```
-
-
-## Structure
-
-    textnorm/
-    ├── README.md
-    ├── setup.py
-    └── textnorm
-        ├── components
-        │   ├── __init__.py
-        │   ├── regex_manager.py
-        │   ├── text_normalizer.py
-        │   ├── text_sanitizer.py
-        │   └── text_tokenizer.py
-        ├── __init__.py
-        ├── patterns
-        │   ├── expressions.py
-        │   └── __init__.py
-        └── tools
-            ├── bad_words_list.py
-            ├── handle_emoji.py
-            ├── __init__.py
-            ├── slang_dict.py
-            └── utils.py
 
