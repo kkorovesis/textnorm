@@ -31,8 +31,7 @@ def get_compiled():
 
 def has_emoji(text):
 
-  text = unicode(text)
-
+  #  txt = unicode(text) deprecated from python 2 version
   RE_EMOJI = get_compiled()
   if re.search(RE_EMOJI, text):
     return True
@@ -53,14 +52,14 @@ def tag_emoji(m, tag, mode):
 
 def sub_emoji(text):
 
-  text = unicode(text)
+  # text = unicode(text)
   RE_EMOJI = get_compiled()
   return RE_EMOJI.sub('<emoji>', text)
 
 
 def add_special_emoji_tag(text, mode):
 
-  text = unicode(text)
+  # text = unicode(text)
   RE_EMOJI = get_compiled()
   text = RE_EMOJI.sub(lambda w: tag_emoji(w, EMOJI_TAG, mode=mode), text)
 

@@ -1,20 +1,16 @@
-#!/usr/bin/env python
-# encoding: utf-8
-import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
-
-import re, os
+# -*- coding: utf-8 -*-
+import re
+import os
 from collections import Counter
-import nltk
 import datetime
+import logging
+import pickle
+import nltk
 try:
   from nltk.corpus import brown
 except Exception:
   nltk.download('brown')
   from nltk.corpus import brown
-import logging
-import pickle
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 dt = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
 logger = logging.getLogger()
@@ -30,31 +26,28 @@ class SpellCorrector(object):
     * Other techniques for optimum results
   """
 
-  def __init__(self, **kwargs):
-    self.corpus = kwargs.get('corpus', 'brown')
-    self.pickled_words = kwargs.get('pickled_words', 'WORDS.pkl')
-    self.WORDS = self.get_words()
+  def __init__(self, corpus='brown'):
+    self.WORDS = self.get_words(corpus)
     self.N = sum(self.WORDS.values())
 
-  def get_words(self):
+  @staticmethod
+  def get_words(corpus=None):
     """
     Word probabilities
     :param corpus:
-    :param pickled_words:
     :return:
     """
-
-    if os.path.exists(self.pickled_words):
-      logger.info("Load language model for `{0}` corpus".format(self.corpus))
-      words = pickle.load(open(self.pickled_words, 'rb'))
+    pickle_file = 'WORDS.pkl'
+    if os.path.exists(pickle_file):
+      words = pickle.load(open(pickle_file, 'rb'))
     else:
-      logger.info("Creating WORDS dictionary for the first time. This might take a few minutes")
+      logger.warning("Creating WORDS dictionary for the first time. This might take a few minutes")
       text = ''
-      if self.corpus == 'brown':
+      if corpus == 'brown':
         for sent in brown.sents():
           text += " ".join(sent)
       words = re.findall(r'\w+', text.lower())
-      pickle.dump(words, open(self.pickled_words, 'wb'))
+      pickle.dump(words, open(pickle_file, 'wb'))
 
     return Counter(words)
 
@@ -114,8 +107,8 @@ class SpellCorrector(object):
   def known(self, words):
     """
     The subset of `words` that appear in the dictionary of WORDS.
-    :param words: 
-    :return: 
+    :param words:
+    :return:
     """
     _ = set(w for w in words if w in self.WORDS)
     return _
@@ -158,10 +151,7 @@ class SpellCorrector(object):
 
 
 def test():
-  speller_params = {
-    'corpus': 'brown',
-  }
-  sp = SpellCorrector(**speller_params)
+  sp = SpellCorrector(corpus="brown")
   print("""
     Spell Corrector
     ================
@@ -172,11 +162,3 @@ def test():
       t='Iarth is not blat but a glofe', ct=sp.correct_text('Iarth is not blat but a glofe')
       )
   )
-
-
-if __name__ == '__main__':
-    test()
-
-
-
-

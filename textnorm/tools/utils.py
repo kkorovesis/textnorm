@@ -1,21 +1,10 @@
 # -*- coding: utf-8 -*-
-# encoding: utf-8
-import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
 import re
 import os
-import nltk
 import datetime
 import logging
 from textnorm.tools.bad_words_list import get_bad_words_list
 from textnorm.tools.slang_dict import slangdict
-
-try:
-  from nltk.corpus import brown
-except Exception:
-  nltk.download('brown')
-  from nltk.corpus import brown
 _HOMEFOLDER_ = os.environ['HOME']
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 dt = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
@@ -27,8 +16,12 @@ NGRAM_SEP = "_"
 
 
 def _unicode(text):
+  """
+  Deprecated method
+  """
   try:
-    text = unicode(text)
+    # text = unicode(text)
+    pass
   except NameError:
     text = str(text)
   except Exception as e:

@@ -1,16 +1,11 @@
-#!/usr/bin/env python
-# encoding: utf-8
-import sys
-reload(sys)
-sys.setdefaultencoding("utf-8")
-
+# -*- coding: utf-8 -*-
 import re
 import string
 import datetime
 import logging
 from collections import Counter
-from regex_manager import RegexManager
-from xnorm.tools.utils import handle_repeated_puncts
+from textnorm.components.regex_manager import RegexManager
+from textnorm.tools.utils import handle_repeated_puncts
 
 from nltk.tokenize.casual import _replace_html_entities
 
@@ -41,7 +36,6 @@ class Sanitizer(object):
     self.merge_repeated_punc = kwargs.get('merge_repeated_punc', False)
     self.regexes = RegexManager().expressions
     self.compiled_regexes = RegexManager().get_compiled()
-    self.for_dataXS = False
 
   def count_words(self, text):  # part of future version
 
@@ -92,7 +86,7 @@ class Sanitizer(object):
   def text_filter(self, text):
 
     text = text.replace('|||', ' ')
-    text= _replace_html_entities(text)
+    text = _replace_html_entities(text)
 
     if text and self.merge_repeated_punc:
       text = self.compiled_regexes["REPEAT_PUNCTS"].sub(

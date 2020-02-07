@@ -24,6 +24,7 @@ is based on ekphrasis[2]. Some features from textacy[3] are used in text pre-pro
 ```bash
 git clone https://github.com/kkorovesis/textnorm
 cd textnorm
+pip install -r requirements.txt
 pip install .
 ```
 
